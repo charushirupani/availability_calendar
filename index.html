@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Availability – Next 30 Days</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1b1f24;--muted:#6b7280;--line:#e5e7eb;
+--g-bg:#dcfce7;--g-bd:#16a34a;--g-tx:#14532d;--r-bg:#fee2e2;--r-bd:#dc2626;--r-tx:#7f1d1d;
+--y-bg:#fef9c3;--y-bd:#ca8a04;--y-tx:#713f12;--n-bg:#fff;--accent:#2563eb;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171a21;--text:#e8eaed;--muted:#9aa3af;--line:#2a2f3a;
+--g-bg:#14351f;--g-bd:#22c55e;--g-tx:#bbf7d0;--r-bg:#3b1414;--r-bd:#ef4444;--r-tx:#fecaca;
+--y-bg:#3a3210;--y-bd:#eab308;--y-tx:#fef08a;--n-bg:#171a21;--accent:#60a5fa}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+main{max-width:860px;margin:0 auto;padding:20px 14px 40px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px;font-size:.95rem}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 16px;font-size:.9rem}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:14px;height:14px;border-radius:4px;border:2px solid}
+.dot.g{background:var(--g-bg);border-color:var(--g-bd)}.dot.r{background:var(--r-bg);border-color:var(--r-bd)}
+.dot.y{background:var(--y-bg);border-color:var(--y-bd)}.dot.n{background:var(--n-bg);border-color:var(--line)}
+.dot.h1{background:linear-gradient(90deg,var(--g-bg) 50%,var(--r-bg) 50%);border-color:var(--g-bd)}
+.dot.h2{background:linear-gradient(90deg,var(--r-bg) 50%,var(--g-bg) 50%);border-color:var(--g-bd)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:.9rem}
+.bar .grow{flex:1;min-width:180px;color:var(--muted)}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:8px;padding:7px 14px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:disabled{opacity:.5;cursor:default}
+button.link{border:none;background:none;color:var(--muted);padding:0;text-decoration:underline;font-size:.8rem}
+.wrap{overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;min-width:520px}
+.dow{text-align:center;font-size:.75rem;font-weight:600;color:var(--muted);padding:2px 0}
+.cell{min-height:84px;border-radius:10px;border:2px solid var(--line);background:var(--n-bg);padding:6px 7px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;font:inherit;color:var(--text)}
+.cell.blank{border:none;background:none;visibility:hidden}
+.cell .n{font-weight:700;font-size:1rem}
+.cell .m{font-size:.68rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.cell .l{font-size:.72rem;font-weight:600}
+.cell.g{background:var(--g-bg);border-color:var(--g-bd);color:var(--g-tx)}
+.cell.r{background:var(--r-bg);border-color:var(--r-bd);color:var(--r-tx)}
+.cell.y{background:var(--y-bg);border-color:var(--y-bd);color:var(--y-tx)}
+.cell.h1{background:linear-gradient(90deg,var(--g-bg) 50%,var(--r-bg) 50%);border-color:var(--g-bd) var(--r-bd) var(--r-bd) var(--g-bd)}
+.cell.h2{background:linear-gradient(90deg,var(--r-bg) 50%,var(--g-bg) 50%);border-color:var(--r-bd) var(--g-bd) var(--g-bd) var(--r-bd)}
+.cell.g .m,.cell.r .m,.cell.y .m{color:inherit;opacity:.8}
+.cell.today{outline:3px solid var(--accent);outline-offset:1px}
+.cell.edit{cursor:pointer}
+.foot{margin-top:14px;color:var(--muted);font-size:.8rem}
+.err{color:var(--r-bd);font-size:.9rem;margin:0 0 10px}
+@media (max-width:520px){.cell{min-height:70px}.cell .l{font-size:.62rem}}
+</style>
+</head>
+<body>
+<main>
+  <h1>My availability</h1>
+  <p class="sub" id="range"></p>
+  <div class="legend">
+    <span><i class="dot g"></i>Available</span>
+    <span><i class="dot r"></i>Unavailable</span>
+    <span><i class="dot h1"></i>First half available</span>
+    <span><i class="dot h2"></i>Second half available</span>
+    <span><i class="dot y"></i>Sunday</span>
+    <span><i class="dot n"></i>Not updated yet</span>
+  </div>
+  <div id="app"></div>
+  <p class="foot">Always shows the next 30 days starting from today, and moves forward automatically each day.
+    <span id="owner"></span></p>
+</main>
+<script>
+(function(){
+  // ---- CONFIG: auto-detected for GitHub Pages (owner.github.io/repo). Override if you use a custom domain. ----
+  var CFG = { owner:"", repo:"", branch:"main", path:"data.json" };
+  if (!CFG.owner) CFG.owner = location.hostname.split(".")[0];
+  if (!CFG.repo)  CFG.repo  = location.pathname.split("/")[1] || "";
+  var API = "https://api.github.com/repos/"+CFG.owner+"/"+CFG.repo+"/contents/"+CFG.path;
+
+  var MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  var ORDER=["","g","h1","h2","r"];
+  var LABEL={g:"Available",r:"Unavailable",h1:"First half available",h2:"Second half available"};
+  var app=document.getElementById("app");
+  var marks={}, token=null, sha=null, dirty=false, saving=false, error="";
+  try{ token=localStorage.getItem("avail_token"); }catch(e){}
+
+  function key(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+  function days(){var t=new Date();t=new Date(t.getFullYear(),t.getMonth(),t.getDate());var o=[];for(var i=0;i<30;i++)o.push(new Date(t.getFullYear(),t.getMonth(),t.getDate()+i));return o;}
+  function hdrs(){return {"Accept":"application/vnd.github+json","Authorization":"Bearer "+token};}
+
+  async function load(){
+    try{
+      if(token){
+        var r=await fetch(API+"?ref="+CFG.branch+"&t="+Date.now(),{headers:hdrs()});
+        if(r.status===401||r.status===403) throw new Error("Your owner token was rejected. Sign out and sign in again.");
+        if(!r.ok) throw new Error("Couldn’t load data ("+r.status+").");
+        var j=await r.json(); sha=j.sha;
+        marks=JSON.parse(atob(j.content.replace(/\n/g,""))).d||{};
+      } else {
+        var r2=await fetch("data.json?t="+Date.now(),{cache:"no-store"});
+        if(r2.ok) marks=(await r2.json()).d||{};
+      }
+    }catch(e){ error=e.message||"Couldn’t load data."; }
+    render();
+  }
+
+  async function save(){
+    if(saving) return; saving=true; error=""; render();
+    var today=key(days()[0]), clean={};
+    Object.keys(marks).forEach(function(k){if(k>=today)clean[k]=marks[k];});
+    try{
+      var body={message:"Update availability",content:btoa(JSON.stringify({d:clean},null,1)),branch:CFG.branch};
+      if(sha) body.sha=sha;
+      var r=await fetch(API,{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},hdrs()),body:JSON.stringify(body)});
+      if(!r.ok) throw new Error(r.status===409?"Out of date. Reload and try again.":"Save failed ("+r.status+"). Check your token has Contents: write access.");
+      sha=(await r.json()).content.sha; marks=clean; dirty=false;
+    }catch(e){ error=e.message; }
+    saving=false; render();
+  }
+
+  function render(){
+    var list=days(),first=list[0],last=list[list.length-1];
+    document.getElementById("range").textContent=MONTHS[first.getMonth()]+" "+first.getDate()+" – "+MONTHS[last.getMonth()]+" "+last.getDate()+", "+last.getFullYear();
+    app.textContent="";
+    if(error){var p=document.createElement("p");p.className="err";p.textContent=error;app.appendChild(p);}
+    if(token){
+      var bar=document.createElement("div");bar.className="bar";
+      var m=document.createElement("div");m.className="grow";
+      m.textContent=dirty?"You have unsaved changes.":"Edit mode: click a day to cycle Available → First half → Second half → Unavailable → Not updated.";
+      var b=document.createElement("button");b.className="primary";b.textContent=saving?"Saving…":"Save changes";b.disabled=!dirty||saving;b.onclick=save;
+      bar.appendChild(m);bar.appendChild(b);app.appendChild(bar);
+    }
+    var wrap=document.createElement("div");wrap.className="wrap";
+    var grid=document.createElement("div");grid.className="grid";
+    DOW.forEach(function(n){var h=document.createElement("div");h.className="dow";h.textContent=n;grid.appendChild(h);});
+    for(var i=0;i<first.getDay();i++){var bl=document.createElement("div");bl.className="cell blank";grid.appendChild(bl);}
+    list.forEach(function(d,idx){
+      var k=key(d),sun=d.getDay()===0,s=sun?"y":(marks[k]||"");
+      var editable=!!token&&!sun;
+      var c=document.createElement(editable?"button":"div");
+      c.className="cell "+s+(idx===0?" today":"")+(editable?" edit":"");
+      var top=document.createElement("div");
+      if(idx===0||d.getDate()===1){var mo=document.createElement("div");mo.className="m";mo.textContent=MONTHS[d.getMonth()];top.appendChild(mo);}
+      var n=document.createElement("div");n.className="n";n.textContent=d.getDate();top.appendChild(n);
+      var l=document.createElement("div");l.className="l";l.textContent=sun?"Sunday":(LABEL[s]||"");
+      c.appendChild(top);c.appendChild(l);
+      if(editable){c.type="button";c.onclick=function(){
+        var nx=ORDER[(ORDER.indexOf(marks[k]||"")+1)%ORDER.length];
+        if(nx)marks[k]=nx;else delete marks[k];dirty=true;render();};}
+      grid.appendChild(c);
+    });
+    wrap.appendChild(grid);app.appendChild(wrap);
+    renderOwner();
+  }
+
+  function renderOwner(){
+    var o=document.getElementById("owner");o.textContent="";
+    var b=document.createElement("button");b.className="link";b.type="button";
+    b.textContent=token?"Owner sign out":"Owner sign in";
+    b.onclick=function(){
+      if(token){token=null;sha=null;try{localStorage.removeItem("avail_token");}catch(e){}dirty=false;error="";load();return;}
+      var t=prompt("Paste your GitHub access token (stored only in this browser):");
+      if(t){token=t.trim();try{localStorage.setItem("avail_token",token);}catch(e){}error="";load();}
+    };
+    o.appendChild(document.createTextNode(" "));o.appendChild(b);
+  }
+
+  load();
+  setInterval(function(){if(!dirty&&!saving)render();},60000);
+})();
+</script>
+</body>
+</html>
